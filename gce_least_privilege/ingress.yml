@@ -1,0 +1,62 @@
+# This block defines ingress rules for Databricks services running in us-east4 region (example)
+- ingressFrom:
+    identities:
+      #   - group:group_email
+      #   - user:user_email
+      #   - serviceAccount:serviceAccount_email
+      - group:databricks-vpc-sc-ingress-group@databricks.com
+    sources:
+      # Databricks central project - only required at workspace creation (us-central1)
+      - resource: projects/68422481410
+      # Databricks regional control plane project (europe-west3)
+      - resource: projects/622303457766
+      # Databricks regional unity catalog project (europe-west3)
+      - resource: projects/691428682010
+  ingressTo:
+    operations:
+      # Allows specific Google Cloud Storage operations
+      - methodSelectors:
+          - method: google.storage.objects.create
+          - method: google.storage.objects.get
+          - method: google.storage.objects.list
+          - method: google.storage.objects.delete
+          - method: google.storage.buckets.testIamPermissions
+        serviceName: storage.googleapis.com
+      # Allows specific Compute Engine operation
+      - methodSelectors:
+          - method: '*'
+        serviceName: compute.googleapis.com
+      # Cloud Logging operations
+      - methodSelectors:
+          - method: '*'
+        serviceName: logging.googleapis.com
+      # Cloud Resource Manager operations
+      - methodSelectors:
+          - method: '*'
+        serviceName: cloudresourcemanager.googleapis.com
+    resources:
+      - projects/<WS1-PROJECT-ID>
+      - projects/<WS2-PROJECT-ID>
+
+
+
+# Optional: Only required if you use audit logging delivery
+# https://docs.gcp.databricks.com/en/admin/account-settings/audit-log-delivery.html
+- ingressFrom:
+    identities:
+      - group:databricks-vpc-sc-ingress-group@databricks.com
+    sources:
+      - resource: projects/85638097580
+  ingressTo:
+    operations:
+      # Allows specific Google Cloud Storage operations for audit log delivery
+      - methodSelectors:
+          - method: google.storage.objects.create
+          - method: google.storage.objects.delete
+          - method: google.storage.objects.get
+          - method: google.storage.objects.list
+          - method: google.storage.buckets.testIamPermissions
+        serviceName: storage.googleapis.com
+    resources:
+      - projects/<WS1-PROJECT-ID>
+      - projects/<WS2-PROJECT-ID>
